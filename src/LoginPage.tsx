@@ -20,10 +20,24 @@ export default function LoginPage() {
     }
   }
 
+  async function handleGoogleLogin() {
+    setLoading(true);
+    try {
+      await login({ provider: "google" }); // appelle authProvider.login
+    } catch (err) {
+      alert((err as Error).message);
+      setLoading(false);
+    }
+  }
+
   return (
     <div style={{ display: "grid", placeItems: "center", height: "100vh", padding: 16 }}>
       <form onSubmit={handleSubmit} style={{ width: 320, display: "grid", gap: 12 }}>
         <h2>MOOD — Admin</h2>
+
+        <button type="button" onClick={handleGoogleLogin} disabled={loading} style={{ padding: 10, borderRadius: 6 }}>
+          {loading ? "Redirection…" : "Se connecter avec Google"}
+        </button>
 
         <label>
           Email
