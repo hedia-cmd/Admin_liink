@@ -48,7 +48,7 @@ export default function WifiUpdate() {
       if (abort) return;
       if (data && data.length) {
         setDevices(data as Device[]);
-        if (!deviceId) setDeviceId((data[0] as any).id);
+        setDeviceId((current) => current || (data[0] as any).id);
       }
     })();
     return () => {
