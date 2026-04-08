@@ -23,11 +23,12 @@ import {
   useRecordContext,
 } from "react-admin";
 import { Route, useNavigate } from "react-router-dom";
-import { useWatch, useFormContext } from "react-hook-form"; // ✅ ajout
+import { useWatch, useFormContext } from "react-hook-form";
 import dataProvider from "./dataProvider";
 import { authProvider } from "./authProvider";
 import LoginPage from "./LoginPage";
 import WifiUpdate from "./pages/WifiUpdate";
+import PlaceClaimRequestsList from "./pages/PlaceClaimRequestsList";
 
 // ✅ Categories resource (déjà dans ton projet)
 import { CategoriesList } from "./resources/categories/CategoriesList";
@@ -155,7 +156,6 @@ const QuestionnaireList = () => (
       <TextField source="id" />
       <TextField source="title" label="Titre" />
 
-      {/* ✅ Affiche le label de la catégorie */}
       <ReferenceField source="category_id" reference="categories" label="Catégorie" link={false}>
         <TextField source="label" />
       </ReferenceField>
@@ -171,7 +171,6 @@ const QuestionnaireEdit = () => (
     <SimpleForm>
       <TextInput source="title" fullWidth />
 
-      {/* ✅ Choix catégorie */}
       <ReferenceInput source="category_id" reference="categories" perPage={1000} label="Catégorie">
         <SelectInput optionText="label" optionValue="id" fullWidth />
       </ReferenceInput>
@@ -186,7 +185,6 @@ const QuestionnaireCreate = () => (
     <SimpleForm>
       <TextInput source="title" required fullWidth />
 
-      {/* ✅ Choix catégorie */}
       <ReferenceInput source="category_id" reference="categories" perPage={1000} label="Catégorie">
         <SelectInput optionText="label" optionValue="id" fullWidth />
       </ReferenceInput>
@@ -250,7 +248,6 @@ const FilteredQuestionInput: React.FC = () => {
   const questionnaireId = useWatch({ name: "questionnaire_id" });
   const { setValue } = useFormContext();
 
-  // reset de la question quand on change de questionnaire
   React.useEffect(() => {
     setValue("question_id", null, { shouldDirty: true, shouldTouch: true });
   }, [questionnaireId, setValue]);
@@ -292,12 +289,10 @@ const ChoiceEdit = () => (
       <TextInput source="text" />
       <NumberInput source="value" />
 
-      {/* ✅ choisir d’abord le questionnaire */}
       <ReferenceInput source="questionnaire_id" reference="questionnaires" label="Questionnaire">
         <SelectInput optionText="title" />
       </ReferenceInput>
 
-      {/* ✅ puis question filtrée */}
       <FilteredQuestionInput />
     </SimpleForm>
   </Edit>
@@ -309,12 +304,10 @@ const ChoiceCreate = () => (
       <TextInput source="text" required />
       <NumberInput source="value" />
 
-      {/* ✅ choisir d’abord le questionnaire */}
       <ReferenceInput source="questionnaire_id" reference="questionnaires" label="Questionnaire">
         <SelectInput optionText="title" />
       </ReferenceInput>
 
-      {/* ✅ puis question filtrée */}
       <FilteredQuestionInput />
     </SimpleForm>
   </Create>
@@ -424,7 +417,6 @@ export default function App() {
     <Admin dataProvider={dataProvider} authProvider={authProvider} loginPage={LoginPage}>
       <Resource name="app_config" list={AppConfigList} edit={AppConfigEdit} options={{ label: "Config" }} />
 
-      {/* ✅ CATEGORIES (nouveau menu dans l’admin) */}
       <Resource
         name="categories"
         list={CategoriesList}
@@ -440,11 +432,28 @@ export default function App() {
         create={QuestionnaireCreate}
         options={{ label: "Questionnaires" }}
       />
-      <Resource name="questions" list={QuestionList} edit={QuestionEdit} create={QuestionCreate} options={{ label: "Questions" }} />
-      <Resource name="choices" list={ChoiceList} edit={ChoiceEdit} create={ChoiceCreate} options={{ label: "Choix" }} />
+      <Resource
+        name="questions"
+        list={QuestionList}
+        edit={QuestionEdit}
+        create={QuestionCreate}
+        options={{ label: "Questions" }}
+      />
+      <Resource
+        name="choices"
+        list={ChoiceList}
+        edit={ChoiceEdit}
+        create={ChoiceCreate}
+        options={{ label: "Choix" }}
+      />
       <Resource name="spots" list={SpotList} edit={SpotEdit} create={SpotCreate} options={{ label: "Spots" }} />
       <Resource name="devices" list={DeviceList} edit={DeviceEdit} create={DeviceCreate} options={{ label: "Devices" }} />
       <Resource name="mood" list={MoodList} edit={MoodEdit} create={MoodCreate} options={{ label: "Mood" }} />
+      <Resource
+        name="place_claim_requests"
+        list={PlaceClaimRequestsList}
+        options={{ label: "Revendications lieux" }}
+      />
 
       <CustomRoutes>
         <Route path="/wifi" element={<WifiUpdate />} />
