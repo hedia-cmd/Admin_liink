@@ -11,6 +11,7 @@ import {
   TextInput,
   Create,
   NumberInput,
+  NumberField,
   ReferenceInput,
   SelectInput,
   ReferenceField,
@@ -132,20 +133,121 @@ const MoodCreate = () => (
   </Create>
 );
 
+/* ========= Regions ========= */
+const RegionsList = () => (
+  <List>
+    <Datagrid rowClick="edit">
+      <TextField source="id" />
+      <TextField source="name" label="Nom" />
+      <TextField source="slug" />
+      <NumberField source="sort_order" label="Ordre" />
+      <BooleanField source="is_active" label="Actif" />
+      <TextField source="created_at" label="Créé le" />
+    </Datagrid>
+  </List>
+);
+
+const RegionsEdit = () => (
+  <Edit>
+    <SimpleForm>
+      <TextInput source="name" label="Nom" fullWidth />
+      <TextInput source="slug" fullWidth />
+      <NumberInput source="sort_order" defaultValue={0} />
+      <BooleanInput source="is_active" defaultValue />
+    </SimpleForm>
+  </Edit>
+);
+
+const RegionsCreate = () => (
+  <Create>
+    <SimpleForm>
+      <TextInput source="name" label="Nom" required fullWidth />
+      <TextInput source="slug" fullWidth />
+      <NumberInput source="sort_order" defaultValue={0} />
+      <BooleanInput source="is_active" defaultValue />
+    </SimpleForm>
+  </Create>
+);
+
+/* ========= Cities ========= */
+const CitiesList = () => (
+  <List>
+    <Datagrid rowClick="edit">
+      <TextField source="id" />
+      <TextField source="name" label="Nom" />
+      <ReferenceField source="region_id" reference="regions" label="Région" link={false}>
+        <TextField source="name" />
+      </ReferenceField>
+      <TextField source="slug" />
+      <NumberField source="sort_order" label="Ordre" />
+      <BooleanField source="is_active" label="Actif" />
+      <TextField source="created_at" label="Créé le" />
+    </Datagrid>
+  </List>
+);
+
+const CitiesEdit = () => (
+  <Edit>
+    <SimpleForm>
+      <TextInput source="name" label="Nom" fullWidth />
+      <ReferenceInput source="region_id" reference="regions" label="Région">
+        <SelectInput optionText="name" optionValue="id" fullWidth />
+      </ReferenceInput>
+      <TextInput source="slug" fullWidth />
+      <NumberInput source="sort_order" defaultValue={0} />
+      <BooleanInput source="is_active" defaultValue />
+    </SimpleForm>
+  </Edit>
+);
+
+const CitiesCreate = () => (
+  <Create>
+    <SimpleForm>
+      <TextInput source="name" label="Nom" required fullWidth />
+      <ReferenceInput source="region_id" reference="regions" label="Région">
+        <SelectInput optionText="name" optionValue="id" fullWidth />
+      </ReferenceInput>
+      <TextInput source="slug" fullWidth />
+      <NumberInput source="sort_order" defaultValue={0} />
+      <BooleanInput source="is_active" defaultValue />
+    </SimpleForm>
+  </Create>
+);
+
+/* ========= Categories ========= */
+const CategoriesEditWithCity = () => (
+  <Edit>
+    <SimpleForm>
+      <TextInput source="label" fullWidth />
+      <TextInput source="slug" helperText="ex: pop, poetique, politique" fullWidth />
+      <ReferenceInput source="city_id" reference="cities" label="Ville">
+        <SelectInput optionText="name" optionValue="id" fullWidth />
+      </ReferenceInput>
+      <TextInput source="description" multiline fullWidth />
+      <NumberInput source="sort_order" />
+      <BooleanInput source="is_active" defaultValue />
+    </SimpleForm>
+  </Edit>
+);
+
+const CategoriesCreateWithCity = () => (
+  <Create>
+    <SimpleForm>
+      <TextInput source="label" fullWidth />
+      <TextInput source="slug" fullWidth />
+      <ReferenceInput source="city_id" reference="cities" label="Ville">
+        <SelectInput optionText="name" optionValue="id" fullWidth />
+      </ReferenceInput>
+      <TextInput source="description" multiline fullWidth />
+      <NumberInput source="sort_order" defaultValue={0} />
+      <BooleanInput source="is_active" defaultValue />
+    </SimpleForm>
+  </Create>
+);
+
 /* ========= Questionnaires ========= */
-/**
- * ✅ Filtre : Catégorie
- * (fonctionne si questionnaires.category_id existe en base)
- */
 const questionnaireFilters = [
-  <ReferenceInput
-    key="category"
-    source="category_id"
-    reference="categories"
-    alwaysOn
-    perPage={1000}
-    label="Catégorie"
-  >
+  <ReferenceInput key="category" source="category_id" reference="categories" alwaysOn perPage={1000} label="Catégorie">
     <SelectInput optionText="label" />
   </ReferenceInput>,
 ];
@@ -155,11 +257,9 @@ const QuestionnaireList = () => (
     <Datagrid rowClick="edit">
       <TextField source="id" />
       <TextField source="title" label="Titre" />
-
       <ReferenceField source="category_id" reference="categories" label="Catégorie" link={false}>
         <TextField source="label" />
       </ReferenceField>
-
       <TextField source="scope" label="Scope" />
       <TextField source="created_at" label="Créé le" />
     </Datagrid>
@@ -170,11 +270,9 @@ const QuestionnaireEdit = () => (
   <Edit>
     <SimpleForm>
       <TextInput source="title" fullWidth />
-
       <ReferenceInput source="category_id" reference="categories" perPage={1000} label="Catégorie">
         <SelectInput optionText="label" optionValue="id" fullWidth />
       </ReferenceInput>
-
       <TextInput source="scope" fullWidth />
     </SimpleForm>
   </Edit>
@@ -184,11 +282,9 @@ const QuestionnaireCreate = () => (
   <Create>
     <SimpleForm>
       <TextInput source="title" required fullWidth />
-
       <ReferenceInput source="category_id" reference="categories" perPage={1000} label="Catégorie">
         <SelectInput optionText="label" optionValue="id" fullWidth />
       </ReferenceInput>
-
       <TextInput source="scope" fullWidth defaultValue="global" />
     </SimpleForm>
   </Create>
@@ -420,10 +516,12 @@ export default function App() {
       <Resource
         name="categories"
         list={CategoriesList}
-        edit={CategoriesEdit}
-        create={CategoriesCreate}
+        edit={CategoriesEditWithCity}
+        create={CategoriesCreateWithCity}
         options={{ label: "Catégories" }}
       />
+      <Resource name="regions" list={RegionsList} edit={RegionsEdit} create={RegionsCreate} options={{ label: "Régions" }} />
+      <Resource name="cities" list={CitiesList} edit={CitiesEdit} create={CitiesCreate} options={{ label: "Villes" }} />
 
       <Resource
         name="questionnaires"
