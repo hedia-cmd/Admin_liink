@@ -516,8 +516,8 @@ export default function App() {
       <Resource
         name="categories"
         list={CategoriesList}
-        edit={CategoriesEditWithCity}
-        create={CategoriesCreateWithCity}
+        edit={CategoriesEdit}
+        create={CategoriesCreate}
         options={{ label: "Catégories" }}
       />
       <Resource name="regions" list={RegionsList} edit={RegionsEdit} create={RegionsCreate} options={{ label: "Régions" }} />

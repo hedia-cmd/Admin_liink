@@ -1,10 +1,35 @@
-import { Edit, SimpleForm, TextInput, BooleanInput, NumberInput } from "react-admin";
+import { Edit, SimpleForm, TextInput, BooleanInput, NumberInput, ReferenceInput, SelectInput } from "react-admin";
+import Typography from "@mui/material/Typography";
 
 export const CategoriesEdit = () => (
   <Edit>
     <SimpleForm>
       <TextInput source="label" fullWidth />
       <TextInput source="slug" helperText="ex: pop, poetique, politique" fullWidth />
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        Si aucune région ni ville n’est choisie, la catégorie sera visible partout.
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        Si une ville est choisie, elle prime sur la région.
+      </Typography>
+      <ReferenceInput source="region_id" reference="regions" label="Région">
+        <SelectInput
+          optionText="name"
+          optionValue="id"
+          emptyText="Toutes les régions"
+          emptyValue={null}
+          fullWidth
+        />
+      </ReferenceInput>
+      <ReferenceInput source="city_id" reference="cities" label="Ville">
+        <SelectInput
+          optionText="name"
+          optionValue="id"
+          emptyText="Toutes les villes"
+          emptyValue={null}
+          fullWidth
+        />
+      </ReferenceInput>
       <TextInput source="description" multiline fullWidth />
       <NumberInput source="sort_order" />
       <BooleanInput source="is_active" defaultValue />
