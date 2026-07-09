@@ -17,7 +17,8 @@ export const CategoriesEdit = () => (
           optionText="name"
           optionValue="id"
           emptyText="Toutes les régions"
-          emptyValue={null}
+          emptyValue=""
+          parse={(value: string) => (value === "" ? null : value)}
           fullWidth
         />
       </ReferenceInput>
@@ -26,7 +27,8 @@ export const CategoriesEdit = () => (
           optionText="name"
           optionValue="id"
           emptyText="Toutes les villes"
-          emptyValue={null}
+          emptyValue=""
+          parse={(value: string) => (value === "" ? null : value)}
           fullWidth
         />
       </ReferenceInput>

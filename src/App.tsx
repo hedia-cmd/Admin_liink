@@ -247,8 +247,14 @@ const CategoriesCreateWithCity = () => (
 
 /* ========= Questionnaires ========= */
 const questionnaireFilters = [
+  <ReferenceInput key="region" source="region_id" reference="regions" alwaysOn perPage={1000} label="Région">
+    <SelectInput optionText="name" optionValue="id" />
+  </ReferenceInput>,
+  <ReferenceInput key="city" source="city_id" reference="cities" alwaysOn perPage={1000} label="Ville">
+    <SelectInput optionText="name" optionValue="id" />
+  </ReferenceInput>,
   <ReferenceInput key="category" source="category_id" reference="categories" alwaysOn perPage={1000} label="Catégorie">
-    <SelectInput optionText="label" />
+    <SelectInput optionText="label" optionValue="id" />
   </ReferenceInput>,
 ];
 
@@ -257,6 +263,12 @@ const QuestionnaireList = () => (
     <Datagrid rowClick="edit">
       <TextField source="id" />
       <TextField source="title" label="Titre" />
+      <ReferenceField source="region_id" reference="regions" label="Région" link={false}>
+        <TextField source="name" />
+      </ReferenceField>
+      <ReferenceField source="city_id" reference="cities" label="Ville" link={false}>
+        <TextField source="name" />
+      </ReferenceField>
       <ReferenceField source="category_id" reference="categories" label="Catégorie" link={false}>
         <TextField source="label" />
       </ReferenceField>
@@ -270,6 +282,12 @@ const QuestionnaireEdit = () => (
   <Edit>
     <SimpleForm>
       <TextInput source="title" fullWidth />
+      <ReferenceInput source="region_id" reference="regions" perPage={1000} label="Région">
+        <SelectInput optionText="name" optionValue="id" fullWidth />
+      </ReferenceInput>
+      <ReferenceInput source="city_id" reference="cities" perPage={1000} label="Ville">
+        <SelectInput optionText="name" optionValue="id" fullWidth />
+      </ReferenceInput>
       <ReferenceInput source="category_id" reference="categories" perPage={1000} label="Catégorie">
         <SelectInput optionText="label" optionValue="id" fullWidth />
       </ReferenceInput>
@@ -282,6 +300,12 @@ const QuestionnaireCreate = () => (
   <Create>
     <SimpleForm>
       <TextInput source="title" required fullWidth />
+      <ReferenceInput source="region_id" reference="regions" perPage={1000} label="Région">
+        <SelectInput optionText="name" optionValue="id" fullWidth />
+      </ReferenceInput>
+      <ReferenceInput source="city_id" reference="cities" perPage={1000} label="Ville">
+        <SelectInput optionText="name" optionValue="id" fullWidth />
+      </ReferenceInput>
       <ReferenceInput source="category_id" reference="categories" perPage={1000} label="Catégorie">
         <SelectInput optionText="label" optionValue="id" fullWidth />
       </ReferenceInput>
