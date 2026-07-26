@@ -30,6 +30,7 @@ import { authProvider } from "./authProvider";
 import LoginPage from "./LoginPage";
 import WifiUpdate from "./pages/WifiUpdate";
 import PlaceClaimRequestsList from "./pages/PlaceClaimRequestsList";
+import { CityExplorationInputs } from "./cityExploration";
 
 // ✅ Categories resource (déjà dans ton projet)
 import { CategoriesList } from "./resources/categories/CategoriesList";
@@ -181,6 +182,12 @@ const CitiesList = () => (
       <TextField source="slug" />
       <NumberField source="sort_order" label="Ordre" />
       <BooleanField source="is_active" label="Actif" />
+      <BooleanField
+        source="is_exploration_active"
+        label="Exploration principale"
+      />
+      <NumberField source="center_lat" label="Latitude centre" />
+      <NumberField source="center_lng" label="Longitude centre" />
       <TextField source="created_at" label="Créé le" />
     </Datagrid>
   </List>
@@ -196,6 +203,7 @@ const CitiesEdit = () => (
       <TextInput source="slug" fullWidth />
       <NumberInput source="sort_order" defaultValue={0} />
       <BooleanInput source="is_active" defaultValue />
+      <CityExplorationInputs />
     </SimpleForm>
   </Edit>
 );
@@ -210,6 +218,7 @@ const CitiesCreate = () => (
       <TextInput source="slug" fullWidth />
       <NumberInput source="sort_order" defaultValue={0} />
       <BooleanInput source="is_active" defaultValue />
+      <CityExplorationInputs />
     </SimpleForm>
   </Create>
 );
