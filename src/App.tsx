@@ -22,6 +22,7 @@ import {
   TopToolbar,
   Button,
   useRecordContext,
+  Toolbar, SaveButton,
 } from "react-admin";
 import { Route, useNavigate } from "react-router-dom";
 import { useWatch, useFormContext } from "react-hook-form";
@@ -30,7 +31,12 @@ import { authProvider } from "./authProvider";
 import LoginPage from "./LoginPage";
 import WifiUpdate from "./pages/WifiUpdate";
 import PlaceClaimRequestsList from "./pages/PlaceClaimRequestsList";
+import MainThemeQuestionnairePage from "./pages/MainThemeQuestionnairePage";
 import { CityExplorationInputs } from "./cityExploration";
+import { FreestyleList, FreestyleCreate, FreestyleEdit } from "./resources/freestyle/Freestyle";
+
+import { DraftOnly, StructurePanel } from './resources/questionnaires/StructurePanel';
+import { editorialInteger } from './questionnaireStructure';
 
 // ✅ Categories resource (déjà dans ton projet)
 import { CategoriesList } from "./resources/categories/CategoriesList";
@@ -267,7 +273,7 @@ const questionnaireFilters = [
   </ReferenceInput>,
 ];
 
-const QuestionnaireList = () => (
+export const QuestionnaireList = () => (
   <List filters={questionnaireFilters}>
     <Datagrid rowClick="edit">
       <TextField source="id" />
@@ -281,46 +287,73 @@ const QuestionnaireList = () => (
       <ReferenceField source="category_id" reference="categories" label="Catégorie" link={false}>
         <TextField source="label" />
       </ReferenceField>
+      <TextField source="status" label="État" />
+      <NumberField source="content_version" label="Version" />
       <TextField source="scope" label="Scope" />
       <TextField source="created_at" label="Créé le" />
     </Datagrid>
   </List>
 );
 
-const QuestionnaireEdit = () => (
-  <Edit>
-    <SimpleForm>
-      <TextInput source="title" fullWidth />
-      <ReferenceInput source="region_id" reference="regions" perPage={1000} label="Région">
-        <SelectInput optionText="name" optionValue="id" fullWidth />
-      </ReferenceInput>
-      <ReferenceInput source="city_id" reference="cities" perPage={1000} label="Ville">
-        <SelectInput optionText="name" optionValue="id" fullWidth />
-      </ReferenceInput>
-      <ReferenceInput source="category_id" reference="categories" perPage={1000} label="Catégorie">
-        <SelectInput optionText="label" optionValue="id" fullWidth />
-      </ReferenceInput>
+const QuestionnaireEditor = () => {
+  const record = useRecordContext<any>();
+  return <>
+    <StructurePanel />
+    {record?.status === 'draft' && <SimpleForm toolbar={<Toolbar><SaveButton /></Toolbar>}>
+      <TextInput source="title" required fullWidth />
       <TextInput source="scope" fullWidth />
-    </SimpleForm>
-  </Edit>
+    </SimpleForm>}
+  </>;
+};
+
+export const QuestionnaireEdit = () => (
+  <Edit mutationMode="pessimistic"><QuestionnaireEditor /></Edit>
 );
 
-const QuestionnaireCreate = () => (
-  <Create>
-    <SimpleForm>
+const QuestionnaireKindInput = () => {
+  const editorial = useWatch({ name: 'editorial' });
+  return <>
+    <BooleanInput source="editorial" label="Questionnaire éditorial (sans thématique)" defaultValue={false} />
+    {!editorial && <ReferenceInput source="theme_id" reference="themes"><SelectInput optionText="name" required fullWidth /></ReferenceInput>}
+  </>;
+};
+
+export const QuestionnaireCreate = () => (
+  <Create redirect="edit">
+    <SimpleForm toolbar={<Toolbar><SaveButton label="Créer le brouillon" /></Toolbar>}>
       <TextInput source="title" required fullWidth />
-      <ReferenceInput source="region_id" reference="regions" perPage={1000} label="Région">
-        <SelectInput optionText="name" optionValue="id" fullWidth />
-      </ReferenceInput>
-      <ReferenceInput source="city_id" reference="cities" perPage={1000} label="Ville">
-        <SelectInput optionText="name" optionValue="id" fullWidth />
-      </ReferenceInput>
-      <ReferenceInput source="category_id" reference="categories" perPage={1000} label="Catégorie">
-        <SelectInput optionText="label" optionValue="id" fullWidth />
-      </ReferenceInput>
-      <TextInput source="scope" fullWidth defaultValue="global" />
+      <QuestionnaireKindInput />
+      <ReferenceInput source="category_id" reference="categories"><SelectInput optionText="label" required fullWidth /></ReferenceInput>
     </SimpleForm>
   </Create>
+);
+
+/* ========= Thématiques du parcours principal ========= */
+const MainQuestionnaireButton = () => {
+  const record = useRecordContext<any>();
+  const navigate = useNavigate();
+  if (!record?.id) return null;
+  return (
+    <Button
+      label="Questionnaire du parcours principal"
+      onClick={() => navigate(`/themes/${record.id}/main-questionnaire`)}
+    />
+  );
+};
+
+const ThemeList = () => (
+  <List sort={{ field: "sort_order", order: "ASC" }}>
+    <Datagrid>
+      <TextField source="name" label="Thématique" />
+      <TextField source="slug" />
+      <NumberField source="sort_order" label="Ordre" />
+      <BooleanField source="is_active" label="Active" />
+      <FunctionField
+        label="Questionnaire du parcours principal"
+        render={() => <MainQuestionnaireButton />}
+      />
+    </Datagrid>
+  </List>
 );
 
 /* ========= Questions ========= */
@@ -338,14 +371,14 @@ const QuestionList = () => (
 );
 
 const QuestionEdit = () => (
-  <Edit>
+  <Edit mutationMode="pessimistic">
+    <DraftOnly>
     <SimpleForm>
       <TextInput source="text" />
-      <NumberInput source="order_index" />
-      <ReferenceInput source="questionnaire_id" reference="questionnaires">
-        <SelectInput optionText="title" />
-      </ReferenceInput>
+      <NumberInput source="order_index" label="Position (1–7)" validate={editorialInteger(1, 7)} />
+      <ReferenceField source="questionnaire_id" reference="questionnaires" link="edit"><TextField source="title" /></ReferenceField>
     </SimpleForm>
+  </DraftOnly>
   </Edit>
 );
 
@@ -353,8 +386,8 @@ const QuestionCreate = () => (
   <Create>
     <SimpleForm>
       <TextInput source="text" required />
-      <NumberInput source="order_index" />
-      <ReferenceInput source="questionnaire_id" reference="questionnaires">
+      <NumberInput source="order_index" label="Position (1–7)" validate={editorialInteger(1, 7)} />
+      <ReferenceInput source="questionnaire_id" reference="questionnaires" filter={{ status: "draft" }}>
         <SelectInput optionText="title" />
       </ReferenceInput>
     </SimpleForm>
@@ -377,7 +410,10 @@ const FilteredQuestionInput: React.FC = () => {
   const questionnaireId = useWatch({ name: "questionnaire_id" });
   const { setValue } = useFormContext();
 
+  const previousQuestionnaire = React.useRef(questionnaireId);
   React.useEffect(() => {
+    if (previousQuestionnaire.current === questionnaireId) return;
+    previousQuestionnaire.current = questionnaireId;
     setValue("question_id", null, { shouldDirty: true, shouldTouch: true });
   }, [questionnaireId, setValue]);
 
@@ -400,6 +436,7 @@ const ChoiceList = () => (
       <TextField source="id" />
       <TextField source="text" />
       <TextField source="value" />
+      <NumberField source="order_index" label="Position" />
 
       <ReferenceField source="questionnaire_id" reference="questionnaires" label="Questionnaire">
         <TextField source="title" />
@@ -413,17 +450,18 @@ const ChoiceList = () => (
 );
 
 const ChoiceEdit = () => (
-  <Edit>
+  <Edit mutationMode="pessimistic">
+    <DraftOnly>
     <SimpleForm>
       <TextInput source="text" />
-      <NumberInput source="value" />
+      <NumberInput source="value" label="Valeur émotionnelle (0–4)" validate={editorialInteger(0, 4)} />
+      <NumberInput source="order_index" label="Position (1–5)" validate={editorialInteger(1, 5)} />
 
-      <ReferenceInput source="questionnaire_id" reference="questionnaires" label="Questionnaire">
-        <SelectInput optionText="title" />
-      </ReferenceInput>
+      <ReferenceField source="questionnaire_id" reference="questionnaires" link="edit"><TextField source="title" /></ReferenceField>
 
-      <FilteredQuestionInput />
+      <ReferenceField source="question_id" reference="questions" link="edit"><TextField source="text" /></ReferenceField>
     </SimpleForm>
+  </DraftOnly>
   </Edit>
 );
 
@@ -431,9 +469,10 @@ const ChoiceCreate = () => (
   <Create>
     <SimpleForm>
       <TextInput source="text" required />
-      <NumberInput source="value" />
+      <NumberInput source="value" label="Valeur émotionnelle (0–4)" validate={editorialInteger(0, 4)} />
+      <NumberInput source="order_index" label="Position (1–5)" validate={editorialInteger(1, 5)} />
 
-      <ReferenceInput source="questionnaire_id" reference="questionnaires" label="Questionnaire">
+      <ReferenceInput source="questionnaire_id" reference="questionnaires" filter={{ status: "draft" }} label="Questionnaire">
         <SelectInput optionText="title" />
       </ReferenceInput>
 
@@ -555,6 +594,9 @@ export default function App() {
       />
       <Resource name="regions" list={RegionsList} edit={RegionsEdit} create={RegionsCreate} options={{ label: "Régions" }} />
       <Resource name="cities" list={CitiesList} edit={CitiesEdit} create={CitiesCreate} options={{ label: "Villes" }} />
+      <Resource name="themes" list={ThemeList} options={{ label: "Thématiques" }} />
+      <Resource name="freestyle_questionnaire_options" />
+      <Resource name="questionnaire_freestyle" list={FreestyleList} create={FreestyleCreate} edit={FreestyleEdit} options={{ label: "Freestyle" }} />
 
       <Resource
         name="questionnaires"
@@ -589,6 +631,10 @@ export default function App() {
       <CustomRoutes>
         <Route path="/wifi" element={<WifiUpdate />} />
         <Route path="/devices/:id/wifi" element={<WifiUpdate />} />
+        <Route
+          path="/themes/:id/main-questionnaire"
+          element={<MainThemeQuestionnairePage />}
+        />
       </CustomRoutes>
     </Admin>
   );

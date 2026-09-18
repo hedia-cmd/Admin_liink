@@ -1,5 +1,7 @@
 // @ts-nocheck
 import supabase from './supabaseClient'   // ⟵ nouveau import
+import { withFreestyle } from './freestyleDataProvider'
+import { createQuestionnaireDraft } from './questionnaireAdmin'
 
 const sb = supabase // alias
 
@@ -69,6 +71,10 @@ const dataProvider = {
   },
 
   async create(resource, params) {
+    if (resource === 'questionnaires') {
+      const id = await createQuestionnaireDraft(params.data)
+      return dataProvider.getOne(resource, { id })
+    }
     const { data, error } = await sb.from(resource).insert(params.data).select().single()
     if (error) throw error
     return { data: mapId(data) }
@@ -108,4 +114,4 @@ const dataProvider = {
   },
 }
 
-export default dataProvider
+export default withFreestyle(dataProvider)
